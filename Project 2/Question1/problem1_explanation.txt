@@ -1,0 +1,22 @@
+Initialization of threads and stage is held in the "spectacular.c" file
+The logic each thread uses is held in the "performance.c" file
+The state information about the stage is held in the stage struct
+The stage struct contains 	the total number of performances performed
+				the current type of performer(s) performing
+				the number of same performers in a row
+				an array of 4 spots which are structs
+The spot struct contains	the type of performer occupying the spot (or Empty)
+				the index of the performer occupying the spor (or -1 if not occupied)
+				
+
+1) Performance Safety -Every time a performer is ready and wants to get on stage, he checks the stage.currentTypeOfPerformance variable to see if its his group performing. In the case when a soloist is on stage, a special if statement prevents anyone from joining
+
+2) Maximum Parallelism - The getStageInfo function, would check the stage.spots  variable and return an array that contains information whether the stage has a free spot, whether the stage is empty, and the index of the last free spot on the stage. Using this function to find out the free spots on the stage, as well as checking the stage.currentTypeOfPerformance variable we allow performers of the same type to join the stage when their type is performing and when the stage has a free spot.
+
+3) Fair Performance Opportunities - The stage.samePerformersInARow global variable counts how many performers of the same type perform in a row. If this number reaches MAXIMUM_CONSECUTIVE_PERFORMANCES defined in the "defines.h" file, then performers of the same type won't be allowed to join the stage. Once a new performer type joins, he resets this global variable to 1. A performer will also go to sleep after performing to allow his group member to take the stage. Once a performer leaves the stage and it happens to be empty, he will signal the other two performer types in a unique order (e.g. Dancers first Signal Jugglers and then Soloists, Jugglers first Signal Soloists and then Dancers etc)
+
+4) Performance Time Variability and Bounds -> Each performer picks a number between SHORTEST_PERFORMANCE and LONGEST_PERFORMANCE defined in the 	"defines.h" file, and this will be the time he will perform for (random number seed is in seed.txt)
+
+5) Pre-performance Napping -> the canGoOnStageC global variable is a condition variable array for each performer type. The performers will wait on their type's condition variable when they are not allowed to go on stage. Once a group member leaves the stage he signals other members of his group a spot is available.
+
+NOTE: If interested in seeing all the individual decisions Performers make set the DEBUG macro to 1 in "defines.h"

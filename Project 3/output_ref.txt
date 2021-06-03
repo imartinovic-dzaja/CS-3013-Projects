@@ -1,0 +1,63 @@
+Initializing the arena
+...requested size 4096 bytes
+...pagesize is 4096 bytes
+...adjusting size with page boundaries
+...adjusted size is 4096 bytes
+...mapping arena with mmap()
+...arena starts at 0x7f9ad30fa000
+...arena ends at 0x7f9ad30fb000
+...initializing header for initial free chunk
+...header size is 32 bytes
+Allocating memory
+...looking for free chunk >= 64
+...found free chunk of size 4064 with header at 0x7f9ad30fa000
+...free chunk->fwd currently points (nil)
+...free chunk->bwd currently points (nil)
+...checking if splitting is required
+...splitting is required
+...updating chunk header at 0x7f9ad30fa000
+...being careful with my pointer arithmetic and void pointer casting
+...allocation starts at 0x7f9ad30fa020
+Allocating memory
+...looking for free chunk >= 128
+...found free chunk of size 3968 with header at 0x7f9ad30fa060
+...free chunk->fwd currently points (nil)
+...free chunk->bwd currently points 0x7f9ad30fa000
+...checking if splitting is required
+...splitting is required
+...updating chunk header at 0x7f9ad30fa060
+...being careful with my pointer arithmetic and void pointer casting
+...allocation starts at 0x7f9ad30fa080
+Allocating memory
+...looking for free chunk >= 3808
+...found free chunk of size 3808 with header at 0x7f9ad30fa100
+...free chunk->fwd currently points (nil)
+...free chunk->bwd currently points 0x7f9ad30fa060
+...checking if splitting is required
+...splitting is not required
+...updating chunk header at 0x7f9ad30fa100
+...being careful with my pointer arithmetic and void pointer casting
+...allocation starts at 0x7f9ad30fa120
+Freeing memory
+...supplied pointer at 0x7f9ad30fa020
+...being careful with my pointer arithmetic and void pointer casting
+...accessing chung header at 0x7f9ad30fa000
+...chunk of size 64
+...checking if coalescing is needed
+...coalescing is not needed
+Freeing memory
+...supplied pointer at 0x7f9ad30fa120
+...being careful with my pointer arithmetic and void pointer casting
+...accessing chung header at 0x7f9ad30fa100
+...chunk of size 3808
+...checking if coalescing is needed
+...coalescing is not needed
+Freeing memory
+...supplied pointer at 0x7f9ad30fa080
+...being careful with my pointer arithmetic and void pointer casting
+...accessing chung header at 0x7f9ad30fa060
+...chunk of size 128
+...checking if coalescing is needed
+...coalescing is needed: fwd and bwd are free
+Destroying the arena
+...unmapping arena with munmap()

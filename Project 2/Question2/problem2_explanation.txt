@@ -1,0 +1,28 @@
+"fedOops.c" sets up the global variables, threads, semapthores etc.
+The packet_queue holds the packets that haven't been picked up yet
+g_stations is an array of structs holding information about the different stations (eg. their name, the team member that reserved it and for which packet)
+blockedTeam is the team that has been blocked by other teams the longest and has priority to go first as soon as enough spots clear up for it
+waitingTeams used to ensure no busy waiting occurs while teams wait for all required stations to become available
+member_semaphores are semaphores for each team member
+new_available_station is a semaphore used for signalling when a station becomes available
+conveyor_lock is a semaphore for making conveyor belt movements(and certain inspections of the stations) atomic
+package_queue_lock is a semaphore for making package pickups atomic
+blockedTeamSemaphore used for updating the blockedTeam global variable atomicaly
+print_semaphore sometimes used to make multiple print statements atomic
+
+"teamMember.c" contains the logic each team member implements
+Initially all team members, except the ones with index 0, will wait for their corresponding member_semaphores to be signalled. The ones with index 0 will be allowed to pick up their package and begin processing. Picking up a package from a queue was made atomic to avoid race conditions
+
+- The "reserveStations" function is used to check atomically whether for the packet that was picked up, all the stations are available and whether we may reserve them for its use. If so the spaces are reserved and the function returns 1, otherwise it returns a 0.
+
+- If the reserveStations function returns 1 we may continue with processing the packet. Otherwise the code inside the while loop puts that thread to sleep in order for it to not busy wait. Apart from that the code inside the while loop also deals with fairness. If the team was waiting for too long to get called over to the assembly line (defined using the BLOCKED_LIMIT macro) it will signal a flag in the blockedTeam struct, and let everyone know that it is the team that's been waiting the longest. Otherwise the team will simply signal all other waiting teams to wake up and try to see if they can find a free spot. The waitingTeams global variable is used to avoid the case of busy waiting. (eg. suppose teams RED GREEN BLUE are waiting ... team RED wakes up GREEN and BLUE and goes to sleep, but then GREEN and BLUE wake up RED again and the cycle repeats and teams end up busy waiting instead of sleeping)
+
+When we continue processing we first have to make sure to reset some global variables related to fairness and busy waiting discussed in the previous section. 
+Next is the "process" function. Here we first print out the status of each station. By status we imply by which packets and team members they are reserver, and not which packet is currently on that station, since this makes more sense for our approach. Next we make the packet leave the previous station atomically using the "leaveStation" function. Inside this function we also signal the teams who are waiting on stations to become available. We check whether a team has priority because it was blocked for too long and signal it. If no team has priority we signal all teams that are waiting. Also not that we don't have to occupy the next station since it is already reserved. The processing is then simulated with a call to sleep for a specific amount of time. Next we fetch a new instruction for the packet and "send" it to that station by calling process again.
+
+Finally after processing the packet, we signal to the next team member and go wait ourselves.
+
+
+Note: The approach of reserving all stations rather than a single one at a time was chosen because it could most consistenlty avoid deadlocks. Altough we are loosing some parallelism since we may not always neccessarily need to have all stations that we require to be free, ensuring a consistent avoidence of deadlocks was of utmost priority. The case of not waiting for all stations to become free become really hard to implement really quickly and it was therefore not attempted because the slight reward was not worth the humongous effort.
+
+NOTE: If interested in seeing all the individual decisions Performers make set the DEBUG macro to 1 in "defines.h"
